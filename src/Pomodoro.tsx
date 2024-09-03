@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const isExtensionEnvironment = !!chrome?.storage;
 
-const Pomodoro: React.FC = () => {
+export default function Pomodoro() {
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(25);
@@ -134,16 +135,29 @@ const Pomodoro: React.FC = () => {
         isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-blue-50 text-blue-900'
       }`}
     >
-      <div className="flex flex-col items-center p-8 rounded-lg shadow-lg bg-opacity-50 backdrop-filter backdrop-blur-lg">
+      <div
+        className={`relative flex flex-col items-center p-8 rounded-2xl shadow-lg ${
+          isDarkMode ? 'bg-gray-800' : 'bg-white'
+        }`}
+      >
         <button
           onClick={toggleDarkMode}
-          className={`absolute top-4 right-2 px-2 py-1 rounded-full transition-colors duration-300 cursor-pointer ${
-            isDarkMode
-              ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300'
-              : 'bg-gray-700 text-yellow-400 hover:bg-gray-600'
+          className={`absolute top-2 right-2 w-12 h-6 rounded-full p-1 transition-colors duration-500 ${
+            isDarkMode ? 'bg-blue-500' : 'bg-yellow-300'
           }`}
+          aria-label={
+            isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'
+          }
         >
-          {isDarkMode ? '☀️' : '🌙'}
+          <motion.div
+            className="w-4 h-4 rounded-full bg-white shadow-md flex items-center justify-center"
+            animate={{ x: isDarkMode ? 24 : 0 }}
+            transition={{ type: 'spring', stiffness: 700, damping: 30 }}
+          >
+            <span className="text-xs" aria-hidden="true">
+              {isDarkMode ? '🌙' : '☀️'}
+            </span>
+          </motion.div>
         </button>
         <div className="relative w-64 h-64 mb-8">
           <svg
@@ -151,7 +165,7 @@ const Pomodoro: React.FC = () => {
             viewBox="0 0 100 100"
           >
             <circle
-              className={`${isDarkMode ? 'text-gray-700' : 'text-blue-200'}`}
+              className={isDarkMode ? 'text-gray-700' : 'text-blue-100'}
               strokeWidth="4"
               stroke="currentColor"
               fill="transparent"
@@ -160,7 +174,7 @@ const Pomodoro: React.FC = () => {
               cy="50"
             />
             <circle
-              className={`${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`}
+              className={isDarkMode ? 'text-blue-500' : 'text-blue-500'}
               strokeWidth="4"
               strokeDasharray="301.59"
               strokeDashoffset={301.59 - (calculateProgress() / 100) * 301.59}
@@ -174,26 +188,32 @@ const Pomodoro: React.FC = () => {
           </svg>
           <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
             <span className="text-4xl font-bold">{formatTime(timeLeft)}</span>
-            <span className="text-lg">{isSession ? 'Session' : 'Break'}</span>
+            <span className="text-lg font-medium mt-2">
+              {isSession ? 'Session' : 'Break'}
+            </span>
           </div>
         </div>
         <div className="flex space-x-4 mb-8">
           <button
             onClick={handleStartPause}
-            className={`font-bold py-2 px-4 rounded-full transition duration-200 ${
+            className={`font-bold py-2 px-6 rounded-full transition duration-200 ${
               isDarkMode
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
+                ? isRunning
+                  ? 'bg-yellow-600 hover:bg-yellow-700 text-gray-900'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+                : isRunning
+                ? 'bg-yellow-400 hover:bg-yellow-500 text-gray-900'
+                : 'bg-green-500 hover:bg-green-600 text-white'
             }`}
           >
             {isRunning ? 'Pause' : 'Start'}
           </button>
           <button
             onClick={handleReset}
-            className={`font-bold py-2 px-4 rounded-full transition duration-200 ${
+            className={`font-bold py-2 px-6 rounded-full transition duration-200 ${
               isDarkMode
                 ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-red-400 hover:bg-red-500 text-white'
+                : 'bg-red-500 hover:bg-red-600 text-white'
             }`}
           >
             Reset
@@ -201,7 +221,7 @@ const Pomodoro: React.FC = () => {
         </div>
         <div className="flex space-x-8">
           <div className="flex flex-col items-center">
-            <label htmlFor="sessionDuration" className="mb-2">
+            <label htmlFor="sessionDuration" className="mb-2 font-medium">
               Session Duration
             </label>
             <input
@@ -215,13 +235,13 @@ const Pomodoro: React.FC = () => {
               }
               className={`w-16 text-center rounded-md p-1 ${
                 isDarkMode
-                  ? 'bg-gray-700 border-gray-600'
-                  : 'bg-blue-100 border-blue-300'
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-blue-50 border-blue-200 text-blue-900'
               }`}
             />
           </div>
           <div className="flex flex-col items-center">
-            <label htmlFor="breakDuration" className="mb-2">
+            <label htmlFor="breakDuration" className="mb-2 font-medium">
               Break Duration
             </label>
             <input
@@ -235,8 +255,8 @@ const Pomodoro: React.FC = () => {
               }
               className={`w-16 text-center rounded-md p-1 ${
                 isDarkMode
-                  ? 'bg-gray-700 border-gray-600'
-                  : 'bg-blue-100 border-blue-300'
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-blue-50 border-blue-200 text-blue-900'
               }`}
             />
           </div>
@@ -244,6 +264,4 @@ const Pomodoro: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default Pomodoro;
+}
